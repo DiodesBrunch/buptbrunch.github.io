@@ -229,6 +229,436 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://buptbrunch.github.io/2019/02/26/用python实现情感分析/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Bupt_brunch">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Master_develop">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/02/26/用python实现情感分析/" itemprop="url">未命名</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-26T14:56:35+08:00">
+                2019-02-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h2 id="title-用python实现情感分析"><a href="#title-用python实现情感分析" class="headerlink" title="title:用python实现情感分析"></a>title:用python实现情感分析</h2><p>因为电商大赛的需求，所以需要实现一个情感分析的功能</p>
+<p>##1.第一阶段</p>
+<p>第一阶段的参考网页主要是：<a href="https://www.jianshu.com/p/d50a14541d01" target="_blank" rel="noopener">https://www.jianshu.com/p/d50a14541d01</a></p>
+<p>一开始直接用python调用snownlp模块</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> snownlp <span class="keyword">import</span> SnowNLP</span><br><span class="line">text = <span class="string">u"我今天很快乐。我今天很愤怒。"</span></span><br><span class="line">s = SnowNLP(text)</span><br><span class="line">print(s.sentiments)</span><br></pre></td></tr></table></figure>
+<p>或者可以先做一个划分</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> snownlp <span class="keyword">import</span> SnowNLP</span><br><span class="line">text = <span class="string">u"我今天很快乐。我今天很愤怒。"</span></span><br><span class="line">s = SnowNLP(text)</span><br><span class="line"><span class="keyword">for</span> sentence <span class="keyword">in</span> s.sentences:</span><br><span class="line">    print(sentence)</span><br></pre></td></tr></table></figure>
+<p>执行的结果是这样的：</p>
+<p><img src="https:////upload-images.jianshu.io/upload_images/64542-da5bffcbeb82af27.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1000" alt="img"></p>
+<p>之后就可以对划分块分别做情感分析了</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">s1 = SnowNLP(s.sentences[<span class="number">0</span>])</span><br><span class="line">s1.sentiments</span><br></pre></td></tr></table></figure>
+<p>但是发现其准确度不高，像类似于“我不高兴”这样的句子，他居然会评为积极性质</p>
+<p>所以从网上找到了一个500W微博评论的数据集，希望训练后结果会好一点</p>
+<h2 id="第二阶段"><a href="#第二阶段" class="headerlink" title="第二阶段"></a>第二阶段</h2><p>第二阶段主要参考文章 <a href="https://blog.csdn.net/hzp666/article/details/78969150" target="_blank" rel="noopener">https://blog.csdn.net/hzp666/article/details/78969150</a></p>
+<p>下载数据集后 用mysql -u root -q 命令进入mysql</p>
+<p>输入密码后 用SOURCE命令导入数据 </p>
+<p>（导入数据参考网页 ：<a href="https://songzhan.iteye.com/blog/1887524）" target="_blank" rel="noopener">https://songzhan.iteye.com/blog/1887524）</a></p>
+<p>暂时还没有进行原教程的去重和清理空的数据</p>
+<p>之后对微博语料进行分类，进行训练</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">from</span> snownlp <span class="keyword">import</span> sentiment</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> pymysql</span><br><span class="line"><span class="keyword">from</span> snownlp <span class="keyword">import</span> SnowNLP</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> snownlp <span class="keyword">import</span> sentiment</span><br><span class="line"><span class="keyword">from</span> snownlp.sentiment <span class="keyword">import</span> Sentiment</span><br><span class="line">conn = pymysql.connect(host=<span class="string">'数据库IP'</span>, user=<span class="string">'用户名'</span>, password=<span class="string">'密码'</span>, charset=<span class="string">"utf8"</span>,use_unicode=<span class="keyword">False</span>)  <span class="comment"># 连接服务器</span></span><br><span class="line"><span class="keyword">with</span> conn:</span><br><span class="line">    cur = conn.cursor()</span><br><span class="line">    cur.execute(<span class="string">"SELECT * FROM test.weibo WHERE weiboId &lt; '%d'"</span> % <span class="number">6000000</span>)</span><br><span class="line">    rows = cur.fetchall()</span><br><span class="line">comment = []</span><br><span class="line"><span class="keyword">for</span> row <span class="keyword">in</span> rows:</span><br><span class="line">    row = list(row)</span><br><span class="line">    comment.append(row[<span class="number">18</span>])</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">train_model</span><span class="params">(texts)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> li <span class="keyword">in</span> texts:</span><br><span class="line">        comm = li.decode(<span class="string">'utf-8'</span>)</span><br><span class="line">        text = re.sub(<span class="string">r'(?:回复)?(?://)?@[\w\u2E80-\u9FFF]+:?|\[\w+\]'</span>, <span class="string">','</span>,comm)</span><br><span class="line">        socre = SnowNLP(text)</span><br><span class="line">        <span class="keyword">if</span> socre.sentiments &gt; <span class="number">0.8</span>:</span><br><span class="line">            <span class="keyword">with</span> open(<span class="string">'pos.txt'</span>, mode=<span class="string">'a'</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> g:</span><br><span class="line">                g.writelines(comm +<span class="string">"\n"</span>)</span><br><span class="line">        <span class="keyword">elif</span> socre.sentiments &lt; <span class="number">0.3</span>:</span><br><span class="line">            <span class="keyword">with</span> open(<span class="string">'neg.txt'</span>, mode=<span class="string">'a'</span>, encoding=<span class="string">'utf-8'</span>) <span class="keyword">as</span> f:</span><br><span class="line">                f.writelines(comm + <span class="string">"\n"</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">train_model(comment)</span><br><span class="line">sentiment.train(<span class="string">'neg.txt'</span>, <span class="string">'pos.txt'</span>)</span><br><span class="line">sentiment.save(<span class="string">'sentiment.marshal'</span>)</span><br></pre></td></tr></table></figure>
+<p>训练过程耗时极长。</p>
+<p>##2.用百度AI实现情感分析</p>
+<p>百度云提供比较完善的自然文本处理功能</p>
+<p>参考网页：<a href="https://blog.csdn.net/AnthonyHDM/article/details/78957303" target="_blank" rel="noopener">https://blog.csdn.net/AnthonyHDM/article/details/78957303</a></p>
+<p>​        <a href="https://www.imooc.com/article/34225" target="_blank" rel="noopener">https://www.imooc.com/article/34225</a></p>
+<p>目前还没使用，可以考虑在之后使用</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://buptbrunch.github.io/2019/02/25/sicp-第一章/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Bupt_brunch">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Master_develop">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/02/25/sicp-第一章/" itemprop="url">未命名</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-25T10:07:15+08:00">
+                2019-02-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h2 id="title-sicp-第一章"><a href="#title-sicp-第一章" class="headerlink" title="title:sicp-第一章"></a>title:sicp-第一章</h2>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://buptbrunch.github.io/2019/02/14/python 学习手记/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Bupt_brunch">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Master_develop">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/02/14/python 学习手记/" itemprop="url">未命名</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-14T19:59:57+08:00">
+                2019-02-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h2 id="python学习手记"><a href="#python学习手记" class="headerlink" title="python学习手记"></a>python学习手记</h2><p>详细资料请翻阅<a href="https://www.liaoxuefeng.com/wiki/0014316089557264a6b348958f449949df42a6d3a2e542c000" target="_blank" rel="noopener">廖雪峰的官方网站</a></p>
+<p>#数据类型：</p>
+<p>##list（列表）:</p>
+<p>list是一种有序的集合，可以随时添加和删除其中的元素。类似于vector</p>
+<p>list定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; classmates = [&apos;Michael&apos;, &apos;Bob&apos;, &apos;Tracy&apos;]</span><br></pre></td></tr></table></figure>
+<p>list访问：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; classmates[0]</span><br><span class="line">&apos;Michael&apos;</span><br><span class="line">&gt;&gt;&gt; classmates[-1]</span><br><span class="line">&apos;Tracy&apos;</span><br></pre></td></tr></table></figure>
+<p>##tuple（元组）</p>
+<p>tuple和list非常类似，但是tuple一旦初始化就不能修改</p>
+<p>tuple 定义（访问与list类似）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; classmates = (&apos;Michael&apos;, &apos;Bob&apos;, &apos;Tracy&apos;)</span><br></pre></td></tr></table></figure>
+<p>##dict （字典）</p>
+<p>用哈希的方法，类似字典查询（类似于C++语言map）</p>
+<p>dict定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; d = &#123;&apos;Michael&apos;: 95, &apos;Bob&apos;: 75, &apos;Tracy&apos;: 85&#125;</span><br><span class="line">&gt;&gt;&gt; d[&apos;Michael&apos;]</span><br><span class="line">95</span><br></pre></td></tr></table></figure>
+<p>初始化后可以通过key放入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; d[&apos;Adam&apos;] = 67</span><br><span class="line">&gt;&gt;&gt; d[&apos;Adam&apos;]</span><br><span class="line">67</span><br></pre></td></tr></table></figure>
+<p>key-value 存储结构，其中key是不变对象</p>
+<p>和list比较，dict有以下几个特点：</p>
+<ol>
+<li>查找和插入的速度极快，不会随着key的增加而变慢；</li>
+<li>需要占用大量的内存，内存浪费多。</li>
+</ol>
+<p>而list相反：</p>
+<ol>
+<li>查找和插入的时间随着元素的增加而增加；</li>
+<li>占用空间小，浪费内存很少。</li>
+</ol>
+<p>##set(集合)</p>
+<p>set和dict类似，也是一组key的集合，但不存储value。由于key不能重复，所以，在set中，没有重复的key。</p>
+<p>set定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; s = set([1, 2, 3])</span><br><span class="line">&gt;&gt;&gt; s</span><br><span class="line">&#123;1, 2, 3&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h1><p>函数定义的特点：</p>
+<p>例：我们可以把年龄和城市设为默认参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def enroll(name, gender, age=6, city=&apos;Beijing&apos;):</span><br><span class="line">    print(&apos;name:&apos;, name)</span><br><span class="line">    print(&apos;gender:&apos;, gender)</span><br><span class="line">    print(&apos;age:&apos;, age)</span><br><span class="line">    print(&apos;city:&apos;, city)</span><br></pre></td></tr></table></figure>
+<p>这样，大多数学生注册时不需要提供年龄和城市，只提供必须的两个参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; enroll(&apos;Sarah&apos;, &apos;F&apos;)</span><br><span class="line">name: Sarah</span><br><span class="line">gender: F</span><br><span class="line">age: 6</span><br><span class="line">city: Beijing</span><br></pre></td></tr></table></figure>
+<p>只有与默认参数不符的学生才需要提供额外的信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">enroll(&apos;Bob&apos;, &apos;M&apos;, 7)</span><br><span class="line">enroll(&apos;Adam&apos;, &apos;M&apos;, city=&apos;Tianjin&apos;)</span><br></pre></td></tr></table></figure>
+<p> 定义默认参数要牢记一点：默认参数必须指向不变对象！</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">def add_end(L=None):</span><br><span class="line">    if L is None:</span><br><span class="line">        L = []</span><br><span class="line">    L.append(&apos;END&apos;)</span><br><span class="line">    return L</span><br></pre></td></tr></table></figure>
+<font color="#FF0000"> *nums<code>表示把</code>nums`这个list的所有元素作为可变参数传进去。这种写法相当有用，而且很常见  </font>
+
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://buptbrunch.github.io/2019/02/11/尝试第一篇博客/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
@@ -522,7 +952,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
